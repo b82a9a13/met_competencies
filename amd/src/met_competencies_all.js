@@ -4,32 +4,50 @@
 */
 function metAll(id){
     const errorText = $(`#metall_danger_${id}`)[0];
+    const successText = $(`#metall_success_${id}`)[0];
+    successText.style.display = 'none';
     errorText.style.display = 'none';
-    let params = '';
-    comp[id - 1].forEach(function(item, index){
-        switch (index){
-            case 0:
-                params += 'c'+index+'='+item;
-                break;
-            default:
-                params += '&c'+index+'='+item;
-                break;
-        }
-    });
-    params += (params != '') ? '&t='+comp[id - 1].length+'&u='+uid : '&u='+uid;
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', './../../../local/met_competencies/classes/inc/met_competencies_all.inc.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function(){
-        if(this.status == 200){
-            const text = JSON.parse(this.responseText);
-            if(text['error']){
-                errorText.innerText = text['error'];
+    const index = comp.findIndex((innerArray) => innerArray[0] === id);
+    if(index !== -1){
+        let params = '';
+        comp[index][1].forEach(function(item, index){
+            switch (index){
+                case 0:
+                    params += 'c'+index+'='+item;
+                    break;
+                default:
+                    params += '&c'+index+'='+item;
+                    break;
+            }
+        });
+        params += (params != '') ? '&t='+comp[index][1].length+'&u='+uid : '&u='+uid;
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', './../../../local/met_competencies/classes/inc/met_competencies_all.inc.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function(){
+            if(this.status == 200){
+                const text = JSON.parse(this.responseText);
+                if(text['error']){
+                    errorText.innerText = text['error'];
+                    errorText.style.display = 'block';
+                } else if(text['return']){
+                    successText.innerText = 'Success';
+                    successText.style.display = 'block';
+                    setTimeout(function(){
+                        window.location.reload();
+                    }, 10);
+                } else {
+                    errorText.innerText = 'Submit error';
+                    errorText.style.display = 'block';
+                }
+            } else {
+                errorText.innerArray = 'Connection error';
                 errorText.style.display = 'block';
             }
-        } else {
-
         }
+        xhr.send(params);
+    } else {
+        errorText.innerArray = 'Error, contact a admin';
+        errorText.style.display = 'block';
     }
-    xhr.send(params);
 }

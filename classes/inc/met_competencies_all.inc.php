@@ -31,10 +31,10 @@ if(!isset($_POST['u'])){
                     } else {
                         $comp = [];
                         for($i = 0; $i < $total; $i++){
-                            if(!isset($_POST["c$total"])){
+                            if(!isset($_POST["c$i"])){
                                 $returnText->error = 'No competency provided';
                             } else {
-                                $c = $_POST["c$total"];
+                                $c = $_POST["c$i"];
                                 if(!preg_match("/^[0-9]*$/", $c) || empty($c)){
                                     $returnText->error = 'Invalid competency provided';
                                 } else {
@@ -42,10 +42,12 @@ if(!isset($_POST['u'])){
                                 }
                             }
                         }
-                        if($comp == []){
-                            $returnText->error = 'No competencies changed';
-                        } else{
-                            
+                        if(!isset($returnText->error)){
+                            if($comp == []){
+                                $returnText->error = 'No competencies changed';
+                            } else{
+                                $returnText->return = $lib->met_all_competencies([$uid, $comp]);
+                            }
                         }
                     }
                 }

@@ -5,8 +5,14 @@
  * @var stdClass $plugin
  */
 namespace local_met_competencies;
+use stdClass;
 
 class lib{
+    private function get_current_userid(): int{
+        global $USER;
+        return $USER->id;
+    }
+
     //Check user exists
     private function check_user_exists($id): bool{
         global $DB;
@@ -24,7 +30,7 @@ class lib{
             SELECT e.courseid, ue.userid, u.firstname, u.lastname FROM {enrol} e
             INNER JOIN {user_enrolments} ue ON ue.enrolid = e.id AND ue.status != 1
             INNER JOIN {user} u ON u.id = ue.userid
-        ) eu ON c.id = eu.courseid AND ra.userid = eu.userid AND (eu.userid = ? OR eu.userid = ?)',[$id, $USER->id]);
+        ) eu ON c.id = eu.courseid AND ra.userid = eu.userid AND (eu.userid = ? OR eu.userid = ?)',[$id, $this->get_current_userid()]);
         $array = [];
         foreach($records as $record){
             if(!array_key_exists($record->courseid, $array)){
@@ -48,5 +54,41 @@ class lib{
         } else {
             return false;
         }
+    }
+
+    //Set all competencies for a specific user id and competency ids
+    public function met_all_competencies($array): bool{
+        global $DB;
+        for($i = 0; $i < count($array[1]); $i++){
+            if(!$DB->record_exists('competency_usercomp', [$DB->sql_compare_text('userid') => $array[0], $DB->sql_compare_text('competencyid') => $array[1][$i]])){
+                return false;
+            } else {
+                $record = new stdClass();
+                $record->id = $DB->get_record_sql('SELECT id FROM {competency_usercomp} WHERE userid = ? AND competencyid = ?',[$array[0], $array[1][$i]])->id;
+                $record->status = 0;
+                $record->reviewerid = $this->get_current_userid();
+                $record->proficiency = 1;
+                $record->grade = 3;
+                $record->timemodified = time();
+                if(!$DB->update_record('competency_usercomp', $record)){
+                    return false;
+                }
+                $insert = new stdClass();
+                $insert->usercompetencyid = $record->id;
+                $insert->contextid = 5;
+                $insert->action = 3;
+                $insert->actionuserid = $record->reviewerid;
+                $insert->descidentifier = 'evidence_manualoverrideinplan';
+                $insert->desccomponent = 'core_competency';
+                $insert->desca = 'PLACEHOLDER';
+                $insert->url = null;
+                $insert->grade = 3;
+                $insert->note = '';
+                $insert->timecreated = $record->timemodified;
+                $insert->timemodified = $record->timemodified;
+                $insert->usermodified = $record->reviewerid;
+            }
+        }
+        return true;
     }
 }
