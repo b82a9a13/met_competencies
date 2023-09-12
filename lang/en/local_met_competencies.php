@@ -15,10 +15,19 @@
 //G
 //H
 //I
+    $string['invalid'] = 'Invalid';
+    $string['invalid_r'] = 'Invalid role';
+    $string['invalid_cp'] = 'Invalid competency provided';
+    $string['invalid_tp'] = 'Invalid total provided';
+    $string['invalid_uip'] = 'Invalid user id provided';
 //J
 //L
 //M
 //N
+    $string['no_cc'] = 'No competencies changed';
+    $string['no_cp'] = 'No competency provided';
+    $string['no_tp'] = 'No total provided';
+    $string['no_uip'] = 'No user id provided';
 //O
 //P
     $string['pluginname'] = 'Met Competencies';

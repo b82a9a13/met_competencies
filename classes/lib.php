@@ -8,6 +8,7 @@ namespace local_met_competencies;
 use stdClass;
 
 class lib{
+    //Get the user id of the current user
     private function get_current_userid(): int{
         global $USER;
         return $USER->id;
@@ -56,37 +57,47 @@ class lib{
         }
     }
 
-    //Set all competencies for a specific user id and competency ids
+    //Set all competencies for a specific user id and competency ids and set them to met if they aren't already
     public function met_all_competencies($array): bool{
         global $DB;
         for($i = 0; $i < count($array[1]); $i++){
+            //Check if the competency exists for the user
             if(!$DB->record_exists('competency_usercomp', [$DB->sql_compare_text('userid') => $array[0], $DB->sql_compare_text('competencyid') => $array[1][$i]])){
                 return false;
             } else {
-                $record = new stdClass();
-                $record->id = $DB->get_record_sql('SELECT id FROM {competency_usercomp} WHERE userid = ? AND competencyid = ?',[$array[0], $array[1][$i]])->id;
-                $record->status = 0;
-                $record->reviewerid = $this->get_current_userid();
-                $record->proficiency = 1;
-                $record->grade = 3;
-                $record->timemodified = time();
-                if(!$DB->update_record('competency_usercomp', $record)){
-                    return false;
+                //Detemine if the competency is already set to met and if not create a class with the relevant data to update a record in the database
+                $tmpRecord = $DB->get_record_sql('SELECT id, grade, proficiency, status FROM {competency_usercomp} WHERE userid = ? AND competencyid = ?',[$array[0], $array[1][$i]]);
+                if($tmpRecord->grade != 3 || $tmpRecord->proficiency != 1 || $tmpRecord->status != 0){
+                    $record = new stdClass();
+                    $record->id = $tmpRecord->id;
+                    $record->status = 0;
+                    $record->reviewerid = $this->get_current_userid();
+                    $record->proficiency = 1;
+                    $record->grade = 3;
+                    $record->timemodified = time();
+                    if(!$DB->update_record('competency_usercomp', $record)){
+                        return false;
+                    }
                 }
-                $insert = new stdClass();
-                $insert->usercompetencyid = $record->id;
-                $insert->contextid = 5;
-                $insert->action = 3;
-                $insert->actionuserid = $record->reviewerid;
-                $insert->descidentifier = 'evidence_manualoverrideinplan';
-                $insert->desccomponent = 'core_competency';
-                $insert->desca = 'PLACEHOLDER';
-                $insert->url = null;
-                $insert->grade = 3;
-                $insert->note = '';
-                $insert->timecreated = $record->timemodified;
-                $insert->timemodified = $record->timemodified;
-                $insert->usermodified = $record->reviewerid;
+                //Determine if the competency is already set to met and if not set it to met by creating a record in the database
+                $tempRecord = $DB->get_record_sql('SELECT grade, action FROM {competency_evidence} WHERE usercompetencyid = ? ORDER BY timemodified DESC LIMIT 1', [$tmpRecord->id]);
+                if($tempRecord->grade != 3 || $tempRecord->action != 3){
+                    $insert = new stdClass();
+                    $insert->usercompetencyid = $tmpRecord->id;
+                    $insert->contextid = 5;
+                    $insert->action = 3;
+                    $insert->actionuserid = $this->get_current_userid();
+                    $insert->descidentifier = 'evidence_manualoverrideinplan';
+                    $insert->desccomponent = 'core_competency';
+                    $insert->desca = '"'.$DB->get_record_sql('SELECT c.name as name FROM {competency_plancomp} cp LEFT JOIN {competency_plan} c ON c.id = cp.planid WHERE cp.competencyid = ? AND c.userid = ?',[$array[1][$i], $array[0]])->name.'"';
+                    $insert->url = null;
+                    $insert->grade = 3;
+                    $insert->note = '';
+                    $insert->timecreated = time();
+                    $insert->timemodified = time();
+                    $insert->usermodified = $insert->actionuserid;
+                    $DB->insert_record('competency_evidence', $insert, false);
+                }
             }
         }
         return true;

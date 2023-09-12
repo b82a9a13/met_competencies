@@ -7,36 +7,36 @@ $p = 'local_met_competencies';
 
 $returnText = new stdClass();
 if(!isset($_POST['u'])){
-    $returnText->error = 'No user id provided';
+    $returnText->error = get_string('no_uip', $p);
 } else {
     $uid = $_POST['u'];
     if(!preg_match("/^[0-9]*$/", $uid) || empty($uid)){
-        $returnText->error = 'Invalid user id provided';
+        $returnText->error = get_string('invalid_uip', $p);
     } else {
         $array = $lib->check_userid_validation($uid);
         if($array[0] != true){
-            $returnText->error = 'Invalid';
+            $returnText->error = get_string('invalid', $p);
         } else {
             $context = context_course::instance($array[1]);
             if(!has_capability('local/met_competencies:coach', $context)){
-                $returnText->error = 'Invalid role';
+                $returnText->error = get_string('invalid_r', $p);
             } else {
                 require_capability('local/met_competencies:coach', $context);
                 if(!isset($_POST['t'])){
-                    $returnText->error = 'No total provided';
+                    $returnText->error = get_string('no_tp', $p);
                 } else {
                     $total = $_POST['t'];
                     if(!preg_match("/^[0-9]*$/", $total) || empty($total)){
-                        $returnText->error = 'Invalid total provided';
+                        $returnText->error = get_string('invalid_tp', $p);
                     } else {
                         $comp = [];
                         for($i = 0; $i < $total; $i++){
                             if(!isset($_POST["c$i"])){
-                                $returnText->error = 'No competency provided';
+                                $returnText->error = get_string('no_cp', $p);
                             } else {
                                 $c = $_POST["c$i"];
                                 if(!preg_match("/^[0-9]*$/", $c) || empty($c)){
-                                    $returnText->error = 'Invalid competency provided';
+                                    $returnText->error = get_string('invalid_cp', $p);
                                 } else {
                                     array_push($comp, $c);
                                 }
@@ -44,7 +44,7 @@ if(!isset($_POST['u'])){
                         }
                         if(!isset($returnText->error)){
                             if($comp == []){
-                                $returnText->error = 'No competencies changed';
+                                $returnText->error = get_string('no_cc', $p);
                             } else{
                                 $returnText->return = $lib->met_all_competencies([$uid, $comp]);
                             }
