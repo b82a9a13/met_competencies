@@ -102,4 +102,10 @@ class lib{
         }
         return true;
     }
+
+    //Check if a record exists in the met_competencies table
+    public function check_met_competencies_record_exists(): bool{
+        global $DB;
+        return (count($DB->get_records_sql('SELECT id FROM {met_competencies}')) > 0) ? true : false;
+    }
 }

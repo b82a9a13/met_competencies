@@ -7,6 +7,8 @@
  */
 
 //A
+    $string['administrate'] = 'Administrate';
+    $string['admin_title'] = 'Met Competencies Administration';
 //B
 //C
 //D
@@ -23,6 +25,7 @@
 //J
 //L
 //M
+    $string['met_ac'] = 'Met All Competencies';
 //N
     $string['no_cc'] = 'No competencies changed';
     $string['no_cp'] = 'No competency provided';
