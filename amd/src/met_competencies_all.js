@@ -33,9 +33,9 @@ function metAll(id){
                 } else if(text['return']){
                     successText.innerText = 'Success';
                     successText.style.display = 'block';
-                    setTimeout(function(){
-                        window.location.reload();
-                    }, 10);
+                    $('.user-evidence-competencies').eq(index).find('li').each(function(ind){
+                        $(this).find('span')[0].innerText = "(-)";
+                    });
                 } else {
                     errorText.innerText = 'Submit error';
                     errorText.style.display = 'block';

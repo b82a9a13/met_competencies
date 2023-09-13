@@ -22,13 +22,12 @@ $PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
 
-$type = ($lib->check_met_competencies_record()) ? 'Disable' : 'Enable';
 $template = (Object)[
     'title' => $title,
     'met_ac' => get_string('met_ac', $p),
-    'type' => $type
+    'type' => ($lib->check_met_competencies_record()) ? 'Disable' : 'Enable'
 ];
-echo $OUTPUT->render_from_template('local_met_competencies/admin', $template);
+echo $OUTPUT->render_from_template("$p/admin", $template);
 
 echo $OUTPUT->footer();
 $_SESSION['met_competencies'] = true;
