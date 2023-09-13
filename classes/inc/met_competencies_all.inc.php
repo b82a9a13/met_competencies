@@ -22,34 +22,38 @@ if(!isset($_POST['u'])){
                 $returnText->error = get_string('invalid_r', $p);
             } else {
                 require_capability('local/met_competencies:coach', $context);
-                if(!isset($_POST['t'])){
-                    $returnText->error = get_string('no_tp', $p);
-                } else {
-                    $total = $_POST['t'];
-                    if(!preg_match("/^[0-9]*$/", $total) || empty($total)){
-                        $returnText->error = get_string('invalid_tp', $p);
+                if($lib->check_met_competencies_record()){
+                    if(!isset($_POST['t'])){
+                        $returnText->error = get_string('no_tp', $p);
                     } else {
-                        $comp = [];
-                        for($i = 0; $i < $total; $i++){
-                            if(!isset($_POST["c$i"])){
-                                $returnText->error = get_string('no_cp', $p);
-                            } else {
-                                $c = $_POST["c$i"];
-                                if(!preg_match("/^[0-9]*$/", $c) || empty($c)){
-                                    $returnText->error = get_string('invalid_cp', $p);
+                        $total = $_POST['t'];
+                        if(!preg_match("/^[0-9]*$/", $total) || empty($total)){
+                            $returnText->error = get_string('invalid_tp', $p);
+                        } else {
+                            $comp = [];
+                            for($i = 0; $i < $total; $i++){
+                                if(!isset($_POST["c$i"])){
+                                    $returnText->error = get_string('no_cp', $p);
                                 } else {
-                                    array_push($comp, $c);
+                                    $c = $_POST["c$i"];
+                                    if(!preg_match("/^[0-9]*$/", $c) || empty($c)){
+                                        $returnText->error = get_string('invalid_cp', $p);
+                                    } else {
+                                        array_push($comp, $c);
+                                    }
+                                }
+                            }
+                            if(!isset($returnText->error)){
+                                if($comp == []){
+                                    $returnText->error = get_string('no_cc', $p);
+                                } else{
+                                    $returnText->return = $lib->met_all_competencies([$uid, $comp]);
                                 }
                             }
                         }
-                        if(!isset($returnText->error)){
-                            if($comp == []){
-                                $returnText->error = get_string('no_cc', $p);
-                            } else{
-                                $returnText->return = $lib->met_all_competencies([$uid, $comp]);
-                            }
-                        }
-                    }
+                    }   
+                } else {
+                    $returnText->error = get_string('feature_isd', $p);
                 }
             }
         }

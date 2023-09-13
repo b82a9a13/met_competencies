@@ -22,7 +22,7 @@ $PAGE->set_pagelayout('admin');
 
 echo $OUTPUT->header();
 
-$type = ($lib->check_met_competencies_record_exists()) ? 'Enable' : 'Disable';
+$type = ($lib->check_met_competencies_record()) ? 'Disable' : 'Enable';
 $template = (Object)[
     'title' => $title,
     'met_ac' => get_string('met_ac', $p),

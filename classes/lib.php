@@ -104,8 +104,47 @@ class lib{
     }
 
     //Check if a record exists in the met_competencies table
-    public function check_met_competencies_record_exists(): bool{
+    private function check_met_competencies_record_exists(): bool{
         global $DB;
         return (count($DB->get_records_sql('SELECT id FROM {met_competencies}')) > 0) ? true : false;
+    }
+
+    //update/create record in the met_competencies table
+    public function manage_met_competencies_record($type): bool{
+        global $DB;
+        $record = new stdClass();
+        switch ($type){
+            case 'd':
+                $record->currentstate = 0;
+                break;
+            case 'e':
+                $record->currentstate = 1;
+                break;
+        }
+        if(!$this->check_met_competencies_record_exists()){
+            $DB->insert_record('met_competencies', $record, false);
+        } else {
+            $record->id = $DB->get_record_sql('SELECT id FROM {met_competencies}')->id;
+            if(!$DB->update_record('met_competencies', $record)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //Check if the met all competencies is disabled
+    public function check_met_competencies_record(): bool{
+        global $DB;
+        if(!$this->check_met_competencies_record_exists()){
+            return true;
+        } else {
+            $state = $DB->get_record_sql('SELECT currentstate FROM {met_competencies}')->currentstate;
+            switch($state){
+                case 1:
+                    return true;
+                case 0:
+                    return false;
+            }
+        }
     }
 }
